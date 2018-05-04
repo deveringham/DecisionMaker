@@ -3,12 +3,12 @@
 #   / _ \___ ____(_)__ (_)__  ___   /  |/  /__ _/ /_____ ____ 	 /_  ___   \
 #  / // / -_) __/ (_-</ / _ \/ _ \ / /|_/ / _ `/  '_/ -_) __/	/@ \/@  \   \
 # /____/\__/\__/_/___/_/\___/_//_//_/  /_/\_,_/_/\_\\__/_/   	\__/\___/   /
-#  																 \_\/______/
-#  DecisionMaker.py												 /     /\\\\\ 
-#  Dylan Everingham for Marissa Kohan							 |     |\\\\\\\ 
-#  																 \      \\\\\\\ 
-#   															  \______/\\\\\
-#     															 	_||_||_
+#																 \_\/______/
+#  DecisionMaker.py 											 /     /\\\\\ 
+#  Dylan Everingham for Marissa Kohan							|     |\\\\\\\ 
+#																 \      \\\\\\\ 
+#																  \______/\\\\\
+#																	_||_||_
 
 #
 # Contains necessary classes for DecisonMaker app backend
@@ -22,9 +22,9 @@ import collections
 #
 # Date
 #	Day of Week					[0 6]
-#	Year						[-100 100]		
+#	Year 						[-100 100]		
 # Time							[0 23]
-# Weather						[0 4]			(Sunny, Cloudy, Raining, Snowing, Natural Disaster)
+# Weather 						[0 4]			(Sunny, Cloudy, Raining, Snowing, Natural Disaster)
 # Dylan/Marissa/Both			[0 2]
 # Hunger Level					[-5 5]
 # Thirst Level					[-5 5]
