@@ -1,11 +1,11 @@
 #
 #    ___          _     _            __  ___     __          	 /\_______/\
 #   / _ \___ ____(_)__ (_)__  ___   /  |/  /__ _/ /_____ ____ 	 /_  ___   \
-#  / // / -_) __/ (_-</ / _ \/ _ \ / /|_/ / _ `/  '_/ -_) __/	/@ \/@  \   \
+#  / // / -_) __/ (_-</ / _ \/ _ \ / /|_/ / _ `/  '_/ -_) __/	/ @\/ @ \   \
 # /____/\__/\__/_/___/_/\___/_//_//_/  /_/\_,_/_/\_\\__/_/   	\__/\___/   /
 #																 \_\/______/
 #  DecisionMaker.py 											 /     /\\\\\ 
-#  Dylan Everingham for Marissa Kohan							|     |\\\\\\\ 
+#  Dylan Everingham for Marissa Kohan							|      \\\\\\\ 
 #																 \      \\\\\\\ 
 #																  \______/\\\\\
 #																	_||_||_
@@ -16,13 +16,13 @@
 # Dependencies
 import sys
 import time
-from PyQt5.QtWidgets import QApplication, QWidget, QPushButton
+from PyQt5.QtWidgets import QApplication, QMainWindow, QDesktopWidget, QPushButton, QSlider, QGridLayout
 from PyQt5.QtGui import QIcon
 from DecisionMaker import *
 
 # DecisionMakerWindow class
 # Defines QtWidget representing DecisionMaker GUI window
-class DecisionMakerWindow(QWidget):
+class DecisionMakerWindow(QMainWindow):
 	# DecisionMakerWindow class constructor
 	def __init__(self):
 		# Call supercalss constructor
@@ -39,8 +39,19 @@ class DecisionMakerWindow(QWidget):
 		# Initialize UI elements
 		# Window properties
 		self.setGeometry(300, 300, 300, 220)
+		window_geom = self.frameGeometry()
+		center_pos = QDesktopWidget().availableGeometry().center()
+		window_geom.moveCenter(center_pos)
+		self.move(window_geom.topLeft())
 		self.setWindowTitle('DecisionMaker')
 		self.setWindowIcon(QIcon('icon.png'))
+
+		# Status bar
+		self.statusBar().showMessage('Ready')
+
+		# Menu bar
+		menu_bar = self.menuBar()
+		file_menu = menu_bar.addMenu('&File')
 
 		# Quit button
 		button_quit = QPushButton('Quit', self)
