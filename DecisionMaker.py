@@ -18,6 +18,15 @@
 import random
 import collections
 
+# Constants
+8BALL = [
+	'Reply hazy try again', \
+	'Ask again later', \
+	'Better not tell you now', \
+	'Cannot predict now', \
+	'Concentrate and ask again', \
+	]
+
 # Parameters [Range] (Encoding) :
 #
 # Date
@@ -147,8 +156,12 @@ class DecisionMaker:
 		# Get all possibility weights
 		weights = [[p.getProb(params)] for p in self.possibilities]
 
+		# Handle the no possibilities case
+		if (sum(weights) == 0)
+			return random.choice(8BALL)
+
 		# Get weighted random choice
-		decision = random.choices(self.possibilities, weights)
+		decision = random.choices(self.possibilities, weights)[0]
 
 		# Return decision
 		return decision.getMsg()
