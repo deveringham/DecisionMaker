@@ -136,6 +136,12 @@ class DecisionMaker:
 		# Start with an empty list of Possibilities
 		self.possibilities = []
 
+		# Add all possibilities from database file
+		fptr = open(db_fname, 'r')
+		for l in fptr.readline():
+			params = l.strip().split('/t')
+			self.addPossibility(Parameters(*tuple(params)))
+
 		# Seed rng
 		random.seed()
 
