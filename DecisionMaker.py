@@ -17,15 +17,10 @@
 # Dependencies
 import random
 import collections
+import csv
 
 # Constants
-8BALL = [
-	'Reply hazy try again', \
-	'Ask again later', \
-	'Better not tell you now', \
-	'Cannot predict now', \
-	'Concentrate and ask again', \
-	]
+EIGHT_BALL = ['Reply hazy try again', 'Ask again later', 'Better not tell you now', 'Cannot predict now', 'Concentrate and ask again']
 
 # Parameters [Range] (Encoding) :
 #
@@ -34,7 +29,7 @@ import collections
 #	Year 						[-100 100]		
 # Time							[0 23]
 # Weather 						[0 4]			(Sunny, Cloudy, Raining, Snowing, Natural Disaster)
-# Dylan/Marissa/Both			[0 2]
+# Alone							[0 1]			(Alone / with someone else)
 # Hunger Level					[-5 5]
 # Thirst Level					[-5 5]
 # Energy Level					[-5 5]
@@ -49,11 +44,10 @@ Parameter_Fields = \
 	 'year', \
 	 'time', \
 	 'weather', \
-	 'person', \
+	 'alone', \
 	 'hunger', \
 	 'thirst', \
 	 'energy', \
-	 'introversion', \
 	 'stress', \
 	 'retograde']
 
@@ -63,7 +57,8 @@ Parameters = collections.namedtuple(
 )
 
 # Possibility object
-# Has a min/max for each parameter, weighting for each parameter, and a baseline weight
+# Has a min/max for each parameter, weighting for each parameter, a baseline weight, and a message string
+# All fields must be ints, except for message
 class Possibility:
 
 	# Possibility class constructor
@@ -97,6 +92,9 @@ class Possibility:
 		if not (self.inLimits(params)):
 			return 0
 
+		# Initialize return value
+		prob = 0
+
 		# Sum up parameter weights
 		#prob = sum([[params.f * self.param_weights.f] for f in Parameter_Fields])
 
@@ -111,8 +109,10 @@ class Possibility:
 	#	limits_satisfied: boolean value which is true if all limits are satisfied, and false otherwise
 	def inLimits(self, params):
 		# Check all limits
-		satisfied_list = [[(params[i] >= self.param_limits[i][0]) and (params[i] <= self.param_limits[i][1])] \
+		satisfied_list = [(params[i] >= self.param_limits[i][0]) and \
+			(params[i] <= self.param_limits[i][1]) \
 			for i in range(len(Parameter_Fields))]
+
 		return (sum(satisfied_list) == len(satisfied_list))
 
 	# Getter for Possibility message
@@ -138,9 +138,18 @@ class DecisionMaker:
 
 		# Add all possibilities from database file
 		fptr = open(db_fname, 'r')
-		for l in fptr.readline():
-			params = l.strip().split('/t')
-			self.addPossibility(Parameters(*tuple(params)))
+		reader = csv.reader(fptr, delimiter='\t')
+		for l in reader:
+			# Ignore comment lines, empty lines and malformed lines
+			if (len(l) == 3*len(Parameter_Fields) + 2):
+				if (len(l[0]) > 0):
+					if (l[0][0] != '#'):
+						message = l[0]
+						base_weight = int(l[1])
+						min_params = Parameters(*tuple([int(i) for i in l[2:12]]))
+						max_params = Parameters(*tuple([int(i) for i in l[12:22]]))
+						param_weights = Parameters(*tuple([int(i) for i in l[22:]]))
+						self.addPossibility(Possibility(min_params, max_params, param_weights, base_weight, message))
 
 		# Seed rng
 		random.seed()
@@ -160,11 +169,11 @@ class DecisionMaker:
 	#	message: string representing the correct decision to be made under these Parameters
 	def choose(self, params):
 		# Get all possibility weights
-		weights = [[p.getProb(params)] for p in self.possibilities]
+		weights = [p.getProb(params) for p in self.possibilities]
 
 		# Handle the no possibilities case
-		if (sum(weights) == 0)
-			return random.choice(8BALL)
+		if (sum(weights) == 0):
+			return random.choice(EIGHT_BALL)
 
 		# Get weighted random choice
 		decision = random.choices(self.possibilities, weights)[0]
