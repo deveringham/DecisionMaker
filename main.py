@@ -182,7 +182,7 @@ class DecisionMakerControls(QWidget):
 		slider_box.addWidget(DecisionMakerSlider('How hungry are you?', parent.setHungerLevel))
 		slider_box.addWidget(DecisionMakerSlider('Thirsty?', parent.setThirstLevel))
 		slider_box.addWidget(DecisionMakerSlider('Energy level?', parent.setEnergyLevel))
-		slider_box.addWidget(DecisionMakerSlider('Introversion?', parent.setIntrovertLevel))
+		slider_box.addWidget(DecisionMakerSlider('Introversion level?', parent.setIntrovertLevel))
 		slider_box.addWidget(DecisionMakerSlider('Stress level?', parent.setStressLevel))
 
 		# Box containing calendar control, time control, weather control, alone toggle and retrograde toggle
@@ -198,10 +198,15 @@ class DecisionMakerControls(QWidget):
 		#lowerright_control_box = QVBoxLayout()
 
 		# Calendar control
-		calendar = QCalendarWidget()
-		calendar.setHorizontalHeaderFormat(QCalendarWidget.SingleLetterDayNames)
-		calendar.setVerticalHeaderFormat(QCalendarWidget.NoVerticalHeader)
-		right_box.addWidget(calendar)
+		self.calendar = QCalendarWidget()
+		self.calendar.setHorizontalHeaderFormat(QCalendarWidget.SingleLetterDayNames)
+		self.calendar.setVerticalHeaderFormat(QCalendarWidget.NoVerticalHeader)
+		self.calendar.selectionChanged.connect(self.calendarChanged)
+		right_box.addWidget(self.calendar)
+
+		# Save today's date
+		self.today = self.calendar.selectedDate()
+
 
 		# Time control
 		time_box = QHBoxLayout()
@@ -288,6 +293,24 @@ class DecisionMakerControls(QWidget):
 			self.parent.setTime(time)
 		if (sender == self.weather_combo):
 			self.parent.setWeather(self.weather_combo.currentIndex())
+
+	# Calendar event handler
+	def calendarChanged(self):
+		sender = self.sender()
+		if (sender == self.calendar):
+			date = self.calendar.selectedDate()
+			self.parent.setDay(date.dayOfWeek() - 1)
+			year = date.year()
+
+			# Limit year to +- 100 form current
+			year = year - self.today.year()
+			if (year > 100):
+				year = 100
+			elif (year < -100):
+				year = -100
+
+			self.parent.setYear(year)
+
 
 # DecisionMakerOutput class definition
 # Widget containing DecisionMaker output box

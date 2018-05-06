@@ -137,6 +137,9 @@ class DecisionMaker:
 		# Start with an empty list of Possibilities
 		self.possibilities = []
 
+		# Initialize last decision tracker
+		self.lastDecision = ''
+
 		# Add all possibilities from database file
 		fptr = open(db_fname, 'r')
 		reader = csv.reader(fptr, delimiter='\t')
@@ -180,15 +183,26 @@ class DecisionMaker:
 	# Return values:
 	#	message: string representing the correct decision to be made under these Parameters
 	def choose(self, params):
-		# Get all possibility weights
-		weights = [p.getProb(params) for p in self.possibilities]
+		decision = self.lastDecision
+		# Prevent getting the same message twice in a row
+		while (decision == self.lastDecision):
 
-		# Handle the no possibilities case
-		if (sum(weights) == 0):
-			return random.choice(EIGHT_BALL)
+			# Get all possibility weights
+			weights = [p.getProb(params) for p in self.possibilities]
 
-		# Get weighted random choice
-		decision = random.choices(self.possibilities, weights)[0]
+			# Handle the no possibilities case
+			if (sum(weights) == 0):
+				return random.choice(EIGHT_BALL)
+
+			# Get weighted random choice
+			decision = (random.choices(self.possibilities, weights)[0]).getMsg()
+
+			# Avoid getting trapped in the 'only one possiblity' case
+			if (len(self.possibilities) <= 1):
+				break
+
+		# Set last decision
+		self.lastDecision = decision
 
 		# Return decision
-		return decision.getMsg()
+		return decision
