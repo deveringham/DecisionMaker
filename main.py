@@ -17,7 +17,7 @@
 import sys
 import time
 import ctypes
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow, \
 	QDesktopWidget, QVBoxLayout, QHBoxLayout, QPushButton, QSlider, \
 	QGridLayout, QLabel, QFrame, QCalendarWidget, QComboBox
@@ -29,6 +29,9 @@ DEFAULT_DB_PATH = 'Possibilities.csv'
 TITLE_IMAGE_PATH = 'DecisionMaker.png'
 AUTHOR = 'Dylan Everingham'
 VERSION = '0.0.1'
+
+LOAD_ANIM_FRAME_NUM = 15
+LOAD_ANIM_FRAME_DELAY = 100
 
 # Makes the taskbar icon work (thanks StackOverflow)
 appid = 'decisionmaker.0.0.1'
@@ -329,8 +332,8 @@ class DecisionMakerOutput(QWidget):
 		self.button_decide.clicked.connect(self.buttonClicked)
 
 		# Result label
-		result_label = QLabel('YOU SHOULD:', self)
-		#result_label.setAlignment(Qt.AlignRight)
+		result_label = QLabel('What should you do?:', self)
+		result_label.setAlignment(Qt.AlignRight | Qt.AlignCenter)
 
 		# Result display
 		result_str = "Select some parameters and hit 'DECIDE'"
@@ -338,6 +341,11 @@ class DecisionMakerOutput(QWidget):
 		self.result_display.setAlignment(Qt.AlignCenter)
 		self.result_display.setFrameStyle(QFrame.Panel | QFrame.Sunken)
 		self.result_display.setMargin(8)
+
+		# Animation timer
+		self.anim_timer = QTimer()
+		self.anim_timer.timeout.connect(self.doOutput)
+		self.frame_count = 0
 
 		# Color palette
 		self.setAutoFillBackground(True)
@@ -352,10 +360,9 @@ class DecisionMakerOutput(QWidget):
 		hbox.addWidget(self.result_display)
 		self.setLayout(hbox)
 
-	# Button event handler
-	def buttonClicked(self):
-		sender = self.sender()
-		if (sender == self.button_decide):
+	# Function to do loading animation
+	def doOutput(self):
+		if (self.frame_count > LOAD_ANIM_FRAME_NUM):
 			# Construct Parameters and make a decision
 			params = Parameters(*tuple(
 				[self.parent.day, \
@@ -373,8 +380,38 @@ class DecisionMakerOutput(QWidget):
 
 			print(params)
 
+			# Get decision
 			result_str = "{}".format(self.parent.decision_maker.choose(params))
+
+			# Display result
 			self.result_display.setText(result_str)
+
+			# Reset animation frame counter and stop timer
+			self.frame_count = 0
+			self.anim_timer.stop()
+
+		# Do loading animation
+		elif(self.frame_count % 4 == 0):
+			self.result_display.setText('/ CALCULATING... /')
+
+		elif(self.frame_count % 4 == 1):
+			self.result_display.setText('| CALCULATING... |')
+
+		elif(self.frame_count % 4 == 2):
+			self.result_display.setText('\ CALCULATING... \\')
+
+		else:
+			self.result_display.setText('-- CALCULATING... --')
+
+		# Increment animation frame counter
+		self.frame_count += 1
+
+	# Button event handler
+	def buttonClicked(self):
+		sender = self.sender()
+		if (sender == self.button_decide):
+			# Start loading animation, will display decisoin when finished
+			self.anim_timer.start(LOAD_ANIM_FRAME_DELAY)
 
 # DecisionMakerSlider class definition
 # Widget conatining slider and labels
