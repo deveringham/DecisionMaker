@@ -48,6 +48,7 @@ Parameter_Fields = \
 	 'hunger', \
 	 'thirst', \
 	 'energy', \
+	 'introversion', \
 	 'stress', \
 	 'retograde']
 
@@ -146,10 +147,21 @@ class DecisionMaker:
 					if (l[0][0] != '#'):
 						message = l[0]
 						base_weight = int(l[1])
-						min_params = Parameters(*tuple([int(i) for i in l[2:12]]))
-						max_params = Parameters(*tuple([int(i) for i in l[12:22]]))
-						param_weights = Parameters(*tuple([int(i) for i in l[22:]]))
-						self.addPossibility(Possibility(min_params, max_params, param_weights, base_weight, message))
+						min_params = Parameters(*tuple(
+							[int(i) for i in l[2:len(Parameter_Fields)+2]])
+						)
+
+						max_params = Parameters(*tuple(
+							[int(i) for i in l[len(Parameter_Fields)+2:2*len(Parameter_Fields)+2]])
+						)
+
+						param_weights = Parameters(*tuple(
+							[int(i) for i in l[2*len(Parameter_Fields)+2:]])
+						)
+
+						self.addPossibility(
+							Possibility(min_params, max_params, param_weights, base_weight, message)
+						)
 
 		# Seed rng
 		random.seed()
