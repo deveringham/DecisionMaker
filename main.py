@@ -20,7 +20,7 @@ import ctypes
 from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow, \
 	QDesktopWidget, QVBoxLayout, QHBoxLayout, QPushButton, QSlider, \
-	QGridLayout, QLabel, QFrame, QCalendarWidget, QComboBox
+	QGridLayout, QLabel, QFrame, QCalendarWidget, QComboBox, QLayout
 from PyQt5.QtGui import QIcon, QPixmap, QPalette
 from DecisionMaker import *
 
@@ -30,7 +30,7 @@ TITLE_IMAGE_PATH = 'DecisionMaker.png'
 AUTHOR = 'Dylan Everingham'
 VERSION = '0.0.1'
 
-LOAD_ANIM_FRAME_NUM = 15
+LOAD_ANIM_FRAME_NUM = 1
 LOAD_ANIM_FRAME_DELAY = 100
 
 # Makes the taskbar icon work (thanks StackOverflow)
@@ -61,7 +61,6 @@ class DecisionMakerWindow(QMainWindow):
 		self.introvert_level = 0
 		self.stress_level = 0
 		
-		# Initialize UI elements
 		# Status bar
 		#self.statusBar().showMessage('Ready')
 
@@ -74,16 +73,21 @@ class DecisionMakerWindow(QMainWindow):
 		title = DecisionMakerTitle()
 		controls = DecisionMakerControls(self)
 		output = DecisionMakerOutput(self)
-		#title.setAlignment(Qt.AlignLeft)
 		vbox.addWidget(title)
 		vbox.addWidget(controls)
 		vbox.addWidget(output)
 		vbox.insertStretch(1)
+		vbox.insertStretch(3)
 		vbox.setSpacing(10)
 		vbox.addSpacing(10)
+
+		hbox = QHBoxLayout()
+		hbox.addLayout(vbox)
+		hbox.insertStretch(0)
+
 		central = QWidget(self)
 		self.setCentralWidget(central)
-		central.setLayout(vbox)
+		central.setLayout(hbox)
 
 		# Color palette
 		self.setAutoFillBackground(True)
@@ -147,17 +151,6 @@ class DecisionMakerTitle(QWidget):
 		# Version
 		title_version = QLabel(VERSION, self)
 
-		# Color palette
-		#self.setAutoFillBackground(True)
-		#palette = self.palette()
-		#palette.setColor(self.backgroundRole(), Qt.black)
-		#self.setPalette(palette)
-		#author_palette = title_author.palette()
-		#author_palette.setColor(QPalette.Text, Qt.white)
-		#title_palette = title_image.palette()
-		#title_palette.setColor(QPalette.Text, Qt.white)
-		#title_image.setPalette(title_palette)
-
 		# Set up layout
 		vbox = QVBoxLayout()
 		vbox.addWidget(title_image)
@@ -205,6 +198,7 @@ class DecisionMakerControls(QWidget):
 		self.calendar.setHorizontalHeaderFormat(QCalendarWidget.SingleLetterDayNames)
 		self.calendar.setVerticalHeaderFormat(QCalendarWidget.NoVerticalHeader)
 		self.calendar.selectionChanged.connect(self.calendarChanged)
+		self.calendar.setFixedWidth(325)
 		right_box.addWidget(self.calendar)
 
 		# Save today's date
@@ -267,7 +261,9 @@ class DecisionMakerControls(QWidget):
 		# Set up layout
 		hbox = QHBoxLayout()
 		hbox.addLayout(slider_box)
+		hbox.insertSpacing(1, 25)
 		hbox.addLayout(right_box)
+		hbox.setSizeConstraint(QLayout.SetFixedSize)
 		self.setLayout(hbox)
 
 	# Button event handler
@@ -326,28 +322,38 @@ class DecisionMakerOutput(QWidget):
 		# Save parent instance
 		self.parent = parent
 
+		# Box containing display button
+		leftbox = QHBoxLayout()
+
 		# Decide button
 		self.button_decide = QPushButton('DECIDE', self)
-		#self.button_decide.resize(self.button_decide.sizeHint())
 		self.button_decide.clicked.connect(self.buttonClicked)
+		self.button_decide.setFixedWidth(225)
+		leftbox.addWidget(self.button_decide)
+
+		# Box conatining output display and label
+		rightbox = QHBoxLayout()
 
 		# Result label
 		result_label = QLabel('What should you do?:', self)
 		result_label.setAlignment(Qt.AlignRight | Qt.AlignCenter)
+		rightbox.addWidget(result_label)
 
 		# Result display
 		result_str = "Select some parameters and hit 'DECIDE'"
 		self.result_display = QLabel(result_str, self)
 		self.result_display.setAlignment(Qt.AlignCenter)
 		self.result_display.setFrameStyle(QFrame.Panel | QFrame.Sunken)
-		self.result_display.setMargin(8)
+		self.result_display.setLineWidth(3)
+		self.result_display.setFixedWidth(300)
+		rightbox.addWidget(self.result_display)
 
 		# Animation timer
 		self.anim_timer = QTimer()
 		self.anim_timer.timeout.connect(self.doOutput)
 		self.frame_count = 0
 
-		# Color palette
+		# Color palettes
 		self.setAutoFillBackground(True)
 		palette = self.palette()
 		palette.setColor(self.backgroundRole(), Qt.white)
@@ -355,9 +361,10 @@ class DecisionMakerOutput(QWidget):
 
 		# Set up layout
 		hbox = QHBoxLayout()
-		hbox.addWidget(self.button_decide)
-		hbox.addWidget(result_label)
-		hbox.addWidget(self.result_display)
+		hbox.addLayout(leftbox)
+		hbox.insertSpacing(1,57)
+		hbox.addLayout(rightbox)
+		hbox.setSizeConstraint(QLayout.SetFixedSize)
 		self.setLayout(hbox)
 
 	# Function to do loading animation
@@ -429,20 +436,13 @@ class DecisionMakerSlider(QWidget):
 
 		slider_label = QLabel(name, self)
 		slider_label.setAlignment(Qt.AlignCenter)
-		#slider_label.setFrameStyle(QFrame.Panel | QFrame.Sunken)
-		#slider_label.setMargin(5)
-		#slider_label.resize(10,50)
 
 		# Create slider
 		slider = QSlider(Qt.Horizontal, self)
 		slider.valueChanged.connect(update_func)
 		slider.setRange(-5,5)
 		slider.setTickPosition(QSlider.TicksAbove)
-
-		# Set up frame
-		#frame = QFrame(self)
-		#frame.setGeometry(self.geometry())
-		#frame.setFrameStyle(QFrame.StyledPanel | QFrame.Plain)
+		slider.setFixedWidth(325)
 
 		# Set up layout
 		hbox = QHBoxLayout()

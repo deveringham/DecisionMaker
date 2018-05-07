@@ -198,7 +198,7 @@ class DecisionMaker:
 			decision = (random.choices(self.possibilities, weights)[0]).getMsg()
 
 			# Avoid getting trapped in the 'only one possiblity' case
-			if (len(self.possibilities) <= 1):
+			if (len([w for w in weights if w != 0]) <= 1):
 				break
 
 		# Set last decision
